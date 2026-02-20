@@ -233,9 +233,12 @@ and %(org-natural-dates-get-timestamp-line)."
 Add this to `org-capture-before-finalize-hook' to automatically
 parse natural language dates from task titles when finishing a capture."
   (save-excursion
-    (goto-char (point-min))
-    ;; Find the org heading in the capture buffer
-    (when (re-search-forward org-complex-heading-regexp nil t)
+    ;; Move to the heading being captured
+    (condition-case nil
+        (org-back-to-heading t)
+      (error (goto-char (point-min))))
+
+    (when (looking-at org-complex-heading-regexp)
       (let* ((title (match-string-no-properties 4))
              (mb (match-beginning 4))
              (me (match-end 4))
