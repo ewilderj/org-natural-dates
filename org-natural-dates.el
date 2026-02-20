@@ -227,6 +227,35 @@ and %(org-natural-dates-get-timestamp-line)."
     (setq org-natural-dates-last-result result)
     (org-capture)))
 
+;;;###autoload
+(defun org-natural-dates-capture-finalize-hook ()
+  "Parse the capture headline and apply natural dates.
+Add this to `org-capture-before-finalize-hook' to automatically
+parse natural language dates from task titles when finishing a capture."
+  (save-excursion
+    (goto-char (point-min))
+    ;; Find the org heading in the capture buffer
+    (when (re-search-forward org-complex-heading-regexp nil t)
+      (let* ((title (match-string-no-properties 4))
+             (mb (match-beginning 4))
+             (me (match-end 4))
+             (parsed (org-natural-dates-parse title)))
+        (when (and title
+                   (or (plist-get parsed :date)
+                       (plist-get parsed :time)
+                       (plist-get parsed :repeater)))
+          ;; Replace the title with the cleaned text
+          (let ((new-title (plist-get parsed :text)))
+            (goto-char mb)
+            (delete-region mb me)
+            (insert new-title))
+          ;; Add the schedule or deadline
+          (let ((ts (plist-get parsed :org-timestamp))
+                (type (plist-get parsed :type)))
+            (if (eq type :deadline)
+                (org-deadline nil ts)
+              (org-schedule nil ts))))))))
+
 ;;; Interactive Scheduling Wrappers
 
 ;;;###autoload
