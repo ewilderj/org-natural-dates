@@ -12,7 +12,7 @@
 ;;
 ;; This package provides interactive wrappers around `org-schedule' and
 ;; `org-deadline' that allow you to type natural language dates like
-;; "every Friday at 3pm" or "next Tuesday". It also provides a capture
+;; "every Friday at 3pm" or "next Tuesday".  It also provides a capture
 ;; helper `org-natural-dates' for full task parsing.
 
 ;;; Code:
@@ -58,7 +58,7 @@
 ;;; Parsing Functions
 
 (defun org-natural-dates--parse-repeater (str)
-  "Extract repeater from STR. Returns (repeater . cleaned-str)."
+  "Extract repeater from STR.  Returns (repeater . cleaned-str)."
   (let ((repeater nil)
         (clean-str str)
         (case-fold-search t))
@@ -89,7 +89,7 @@
     (cons repeater clean-str)))
 
 (defun org-natural-dates--parse-time (str)
-  "Extract time from STR. Returns (time . cleaned-str)."
+  "Extract time from STR.  Returns (time . cleaned-str)."
   (let ((time nil)
         (clean-str str)
         (case-fold-search t))
@@ -105,7 +105,7 @@
     (cons time clean-str)))
 
 (defun org-natural-dates--parse-date (str)
-  "Extract date expression from STR. Returns (date type . cleaned-str)."
+  "Extract date expression from STR.  Returns (date type . cleaned-str)."
   (let ((date nil)
         (type :scheduled)
         (clean-str str)
@@ -204,6 +204,7 @@ KEY can be :text, :org-timestamp, :repeater, :time, :date, :type."
 ;;;###autoload
 (defun org-natural-dates (&optional string)
   "Prompt for a natural language task and capture it.
+If STRING is provided, use it as the task input instead of prompting.
 The capture template should use %(org-natural-dates-get :text)
 and %(org-natural-dates-get-timestamp-line)."
   (interactive)
@@ -217,8 +218,8 @@ and %(org-natural-dates-get-timestamp-line)."
 ;;;###autoload
 (defun org-natural-dates-schedule (arg)
   "Schedule the item at point using natural language.
-ARG is passed to `org-schedule`. If ARG is provided (e.g. C-u),
-it falls back to standard `org-schedule` behavior."
+ARG is passed to `org-schedule'.  If ARG is provided (e.g. `\\[universal-argument]'),
+it falls back to standard `org-schedule' behavior."
   (interactive "P")
   (if arg
       (org-schedule arg)
@@ -230,8 +231,8 @@ it falls back to standard `org-schedule` behavior."
 ;;;###autoload
 (defun org-natural-dates-deadline (arg)
   "Set a deadline for the item at point using natural language.
-ARG is passed to `org-deadline`. If ARG is provided (e.g. C-u),
-it falls back to standard `org-deadline` behavior."
+ARG is passed to `org-deadline'.  If ARG is provided (e.g. `\\[universal-argument]'),
+it falls back to standard `org-deadline' behavior."
   (interactive "P")
   (if arg
       (org-deadline arg)
@@ -243,7 +244,7 @@ it falls back to standard `org-deadline` behavior."
 ;;;###autoload
 (defun org-natural-dates-agenda-schedule (arg)
   "Schedule the item at point in Org Agenda using natural language.
-ARG is passed to `org-agenda-schedule`. If ARG is provided,
+ARG is passed to `org-agenda-schedule'.  If ARG is provided (e.g. `\\[universal-argument]'),
 it falls back to standard behavior."
   (interactive "P")
   (if arg
@@ -256,7 +257,7 @@ it falls back to standard behavior."
 ;;;###autoload
 (defun org-natural-dates-agenda-deadline (arg)
   "Set a deadline for the item at point in Org Agenda using natural language.
-ARG is passed to `org-agenda-deadline`. If ARG is provided,
+ARG is passed to `org-agenda-deadline'.  If ARG is provided (e.g. `\\[universal-argument]'),
 it falls back to standard behavior."
   (interactive "P")
   (if arg
