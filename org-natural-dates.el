@@ -1,4 +1,21 @@
-;;; org-natural-dates.el --- Natural language date parsing for Org capture -*- lexical-binding: t; -*-
+;;; org-natural-dates.el --- Natural language date parsing for Org mode -*- lexical-binding: t; -*-
+
+;; Author: Edd Wilder-James <edd@ewilderj.com>
+;; Version: 0.1.0
+;; Package-Requires: ((emacs "27.1") (org "9.0"))
+;; Keywords: calendar, org
+;; URL: https://github.com/ewilderj/org-natural-dates
+
+;;; Commentary:
+
+;; Natural language date parsing for Org mode capture, scheduling, and deadlines.
+;;
+;; This package provides interactive wrappers around `org-schedule' and
+;; `org-deadline' that allow you to type natural language dates like
+;; "every Friday at 3pm" or "next Tuesday". It also provides a capture
+;; helper `org-natural-dates' for full task parsing.
+
+;;; Code:
 
 (require 'org)
 (require 'rx)
@@ -250,3 +267,5 @@ it falls back to standard behavior."
       (org-agenda-deadline nil time))))
 
 (provide 'org-natural-dates)
+
+;;; org-natural-dates.el ends here
