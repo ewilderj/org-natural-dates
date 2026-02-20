@@ -62,3 +62,21 @@ Press `C-c n`, type "Call Dave tomorrow at 5pm", and select the "n" template to 
 
 ** License
 GPLv3. See LICENSE for details.
+
+** Development
+We use [[https://github.com/alphapapa/makem.sh][makem.sh]] for linting (`checkdoc`, `package-lint`) and testing.
+
+To run the linters and tests locally, you can use `makem.sh`. Note that on macOS, `makem.sh` requires GNU `coreutils` (specifically `gdate` and `gmktemp`) to be installed via Homebrew.
+
+#+BEGIN_SRC bash
+curl -sL https://raw.githubusercontent.com/alphapapa/makem.sh/master/makem.sh -o makem.sh
+chmod +x makem.sh
+
+# Run tests
+./makem.sh test
+
+# Run linters
+./makem.sh lint
+#+END_SRC
+
+Continuous integration is automatically set up via GitHub Actions to verify these rules across Emacs 27, 28, and 29.
