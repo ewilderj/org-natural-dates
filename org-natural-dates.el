@@ -38,9 +38,14 @@
   "Regex for recurring intervals.")
 
 (defconst org-natural-dates--time-regexp
-  (rx (seq (optional (seq (or "at" "At" "@") (1+ space)))
-           (or (seq (1+ digit) ":" (1+ digit))
-               (seq (1+ digit) (optional (seq ":" (1+ digit))) (optional space) (or "am" "pm" "AM" "PM")))))
+  (rx (or
+       ;; Require "at" for simple numbers to avoid date collisions
+       (seq (or "at" "At" "@") (1+ space)
+            (1+ digit) (optional (seq ":" (1+ digit)))
+            (optional (optional space) (or "am" "pm" "AM" "PM")))
+       ;; Without "at", must have colon or am/pm
+       (seq (1+ digit) ":" (1+ digit) (optional (optional space) (or "am" "pm" "AM" "PM")))
+       (seq (1+ digit) (optional (seq ":" (1+ digit))) (optional space) (or "am" "pm" "AM" "PM"))))
   "Regex for time expressions.")
 
 (defconst org-natural-dates--date-regexp
@@ -94,13 +99,22 @@
         (clean-str str)
         (case-fold-search t))
     (when (string-match org-natural-dates--time-regexp str)
-      (let ((match (match-string 0 str)))
-        ;; Extract the actual time part (ignoring "at ")
-        (let ((time-part (save-match-data
-                           (if (string-match (rx (or "at" "At" "@") (1+ space)) match)
-                               (substring match (match-end 0))
-                             match))))
-          (setq time time-part))
+      (let* ((match (match-string 0 str))
+             (time-res (save-match-data
+                         (let ((time-part (if (string-match (rx (or "at" "At" "@") (1+ space)) match)
+                                              (substring match (match-end 0))
+                                            match)))
+                           (if (not (string-match-p "[a-zA-Z]" time-part))
+                               (if (string-match "^\\([0-9]+\\)\\(:[0-9]+\\)?$" time-part)
+                                   (let ((hour (string-to-number (match-string 1 time-part))))
+                                     (cond
+                                      ((and (>= hour 7) (<= hour 11)) (concat time-part "am"))
+                                      ((and (>= hour 1) (<= hour 6)) (concat time-part "pm"))
+                                      ((= hour 12) (concat time-part "pm"))
+                                      (t time-part)))
+                                 time-part)
+                             time-part)))))
+        (setq time time-res)
         (setq clean-str (string-trim (replace-match "" nil nil str)))))
     (cons time clean-str)))
 

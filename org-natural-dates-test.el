@@ -26,6 +26,14 @@
      "Dinner" nil "19:00" nil)
     ("Call Mom tomorrow at 5pm"
      "Call Mom" "tomorrow" "17:00" nil)
+    ("Dentist on Monday at 11"
+     "Dentist" "Monday" "11:00" nil)
+    ("Lunch on Tuesday at 12"
+     "Lunch" "Tuesday" "12:00" nil)
+    ("Coffee at 3:30"
+     "Coffee" nil "15:30" nil)
+    ("Gym at 8"
+     "Gym" nil "08:00" nil)
 
     ;; Recurring
     ("Gym every day"
