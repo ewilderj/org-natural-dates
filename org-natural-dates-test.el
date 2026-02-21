@@ -1,5 +1,7 @@
 ;;; org-natural-dates-test.el --- Tests for org-natural-dates  -*- lexical-binding: t; -*-
 
+;;; Code:
+
 (require 'ert)
 (require 'org-natural-dates "./org-natural-dates.el")
 
@@ -128,26 +130,26 @@
   "Test that today/tomorrow/yesterday resolve to correct dates."
   (let ((today (format-time-string "%Y-%m-%d"))
         (tomorrow (format-time-string "%Y-%m-%d"
-                   (time-add (current-time) (days-to-time 1))))
+				      (time-add (current-time) (days-to-time 1))))
         (yesterday (format-time-string "%Y-%m-%d"
-                    (time-add (current-time) (days-to-time -1)))))
+				       (time-add (current-time) (days-to-time -1)))))
     (should (string-match-p today
-              (plist-get (org-natural-dates-parse "do something today") :org-timestamp)))
+			    (plist-get (org-natural-dates-parse "do something today") :org-timestamp)))
     (should (string-match-p tomorrow
-              (plist-get (org-natural-dates-parse "do something tomorrow") :org-timestamp)))
+			    (plist-get (org-natural-dates-parse "do something tomorrow") :org-timestamp)))
     (should (string-match-p yesterday
-              (plist-get (org-natural-dates-parse "did something yesterday") :org-timestamp)))))
+			    (plist-get (org-natural-dates-parse "did something yesterday") :org-timestamp)))))
 
 (ert-deftest org-natural-dates-in-n-days-test ()
   "Test \"in N days/weeks\" resolves to correct offset."
   (let ((in-3d (format-time-string "%Y-%m-%d"
-                (time-add (current-time) (days-to-time 3))))
+				   (time-add (current-time) (days-to-time 3))))
         (in-2w (format-time-string "%Y-%m-%d"
-                (time-add (current-time) (days-to-time 14)))))
+				   (time-add (current-time) (days-to-time 14)))))
     (should (string-match-p in-3d
-              (plist-get (org-natural-dates-parse "submit report in 3 days") :org-timestamp)))
+			    (plist-get (org-natural-dates-parse "submit report in 3 days") :org-timestamp)))
     (should (string-match-p in-2w
-              (plist-get (org-natural-dates-parse "review in 2 weeks") :org-timestamp)))))
+			    (plist-get (org-natural-dates-parse "review in 2 weeks") :org-timestamp)))))
 
 (ert-deftest org-natural-dates-last-day-test ()
   "Test \"last <day>\" resolves to the most recent past occurrence."
@@ -158,11 +160,11 @@
                      "Thursday" "Friday" "Saturday"])
          (target-name (aref day-names target-dow))
          (expected (format-time-string "%Y-%m-%d"
-                    (time-add (current-time) (days-to-time -3)))))
+				       (time-add (current-time) (days-to-time -3)))))
     (should (string-match-p expected
-              (plist-get (org-natural-dates-parse
-                          (concat "call last " target-name))
-                         :org-timestamp)))))
+			    (plist-get (org-natural-dates-parse
+					(concat "call last " target-name))
+				       :org-timestamp)))))
 
 (ert-deftest org-natural-dates-last-same-day-test ()
   "Test \"last <today's day>\" gives 7 days ago, not today."
@@ -171,11 +173,11 @@
                      "Thursday" "Friday" "Saturday"])
          (today-name (aref day-names today-dow))
          (week-ago (format-time-string "%Y-%m-%d"
-                    (time-add (current-time) (days-to-time -7)))))
+				       (time-add (current-time) (days-to-time -7)))))
     (should (string-match-p week-ago
-              (plist-get (org-natural-dates-parse
-                          (concat "met last " today-name))
-                         :org-timestamp)))))
+			    (plist-get (org-natural-dates-parse
+					(concat "met last " today-name))
+				       :org-timestamp)))))
 
 ;;; Case insensitivity tests
 
@@ -284,3 +286,7 @@
   ;; No date → nil
   (should (equal (org-natural-dates--parse-date "just text")
                  '(nil :scheduled "just text"))))
+
+(provide 'org-natural-dates-test)
+
+;;; org-natural-dates-test.el ends here
