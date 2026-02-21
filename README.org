@@ -26,6 +26,22 @@ Works with =org-schedule=, =org-deadline=, Org Agenda, and =org-capture=.
 M-x package-install RET org-natural-dates RET
 #+end_src
 
+*** use-package with straight.el
+
+#+begin_src emacs-lisp
+(use-package org-natural-dates
+  :straight (org-natural-dates :type git :host github :repo "ewilderj/org-natural-dates")
+  :after org
+  :bind (:map org-mode-map
+         ("C-c C-s" . org-natural-dates-schedule)
+         ("C-c C-d" . org-natural-dates-deadline)
+         :map org-agenda-mode-map
+         ("C-c C-s" . org-natural-dates-agenda-schedule)
+         ("C-c C-d" . org-natural-dates-agenda-deadline))
+  :config
+  (add-hook 'org-capture-before-finalize-hook #'org-natural-dates-capture-finalize-hook))
+#+end_src
+
 *** Manual
 
 Clone and add to your =load-path=:
