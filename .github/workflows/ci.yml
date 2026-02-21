@@ -28,7 +28,7 @@ jobs:
           chmod +x makem.sh
 
       - name: Lint (checkdoc, package-lint)
-        run: ./makem.sh --eval '(setq checkdoc-spellcheck-documentation-flag nil)' lint
+        run: ./makem.sh lint
 
       - name: Run Tests (ERT)
         run: ./makem.sh test

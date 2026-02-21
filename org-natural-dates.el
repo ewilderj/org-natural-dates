@@ -335,4 +335,7 @@ With prefix ARG, fall back to standard `org-agenda-deadline'."
 
 (provide 'org-natural-dates)
 
+;; Local Variables:
+;; ispell-buffer-session-localwords: ("CLEANED" "STR" "ORG" "FN")
+;; End:
 ;;; org-natural-dates.el ends here
