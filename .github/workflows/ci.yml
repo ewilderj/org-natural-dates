@@ -27,11 +27,8 @@ jobs:
           curl -sL https://raw.githubusercontent.com/alphapapa/makem.sh/master/makem.sh -o makem.sh
           chmod +x makem.sh
 
-      - name: Lint (byte-compile, package-lint)
-        run: ./makem.sh lint-compile lint-package
-
-      - name: Lint (checkdoc)
-        run: ./makem.sh lint-checkdoc || true
-
-      - name: Run Tests (ERT)
-        run: ./makem.sh test
+      - name: Lint and Test
+        run: |
+          ./makem.sh -s sandbox \
+            --install-deps --install-linters \
+            lint-compile lint-package test
