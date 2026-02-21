@@ -2,7 +2,7 @@
 
 ;; Author: Edd Wilder-James <edd@ewilderj.com>
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "27.1") (org "9.0"))
+;; Package-Requires: ((emacs "28.1") (org "9.0"))
 ;; Keywords: calendar, org
 ;; URL: https://github.com/ewilderj/org-natural-dates
 
