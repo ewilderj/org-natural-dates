@@ -1,78 +1,92 @@
 * org-natural-dates
+
 Natural language date parsing for Org mode scheduling, deadlines, and capture.
 
-** Overview
-`org-natural-dates` enables you to use natural language—like "every Friday at 3pm", "tomorrow", or "next Tuesday"—when scheduling tasks or setting deadlines in Org mode. It works seamlessly as a wrapper around the standard `org-schedule` and `org-deadline` commands, both in regular Org buffers and the Org Agenda.
+Type what you mean — =tomorrow at 3pm=, =every Friday=, =in 3 days= — and let Org figure out the timestamp.
+
+** Examples
+
+| You type                              | Org result                               |
+|---------------------------------------+------------------------------------------|
+| =tomorrow=                            | =SCHEDULED: <2026-02-22 Sun>=            |
+| =next Tuesday at 10am=                | =SCHEDULED: <2026-02-24 Tue 10:00>=      |
+| =in 3 days=                           | =SCHEDULED: <2026-02-24 Tue>=            |
+| =every Friday=                        | =SCHEDULED: <2026-02-27 Fri +1w>=        |
+| =every 2 weeks=                       | =SCHEDULED: <2026-02-21 Sat +2w>=        |
+| =every day at 5pm=                    | =SCHEDULED: <2026-02-21 Sat 17:00 +1d>=  |
+| =due tomorrow= (in capture)           | =DEADLINE: <2026-02-22 Sun>=             |
+
+Works with =org-schedule=, =org-deadline=, Org Agenda, and =org-capture=.
 
 ** Installation
 
-*** MELPA (Coming Soon)
-Once published on MELPA, you will be able to install using:
-#+BEGIN_SRC elisp
+*** MELPA (coming soon)
+
+#+begin_src emacs-lisp
 M-x package-install RET org-natural-dates RET
-#+END_SRC
+#+end_src
 
 *** Manual
-1. Clone this repository to your Emacs `load-path`.
-2. Add the following to your `init.el`:
 
-#+BEGIN_SRC elisp
+Clone and add to your =load-path=:
+
+#+begin_src emacs-lisp
 (add-to-list 'load-path "/path/to/org-natural-dates")
 (require 'org-natural-dates)
-#+END_SRC
+#+end_src
 
-*** Configuration
-To get the most out of `org-natural-dates`, bind its commands to the standard Org scheduling keys:
+** Configuration
 
-#+BEGIN_SRC elisp
-;; Rebind in standard org-mode
+Bind the commands over the standard Org scheduling keys:
+
+#+begin_src emacs-lisp
+;; In org-mode buffers
 (with-eval-after-load 'org
-  (define-key org-mode-map (kbd "C-c C-s") 'org-natural-dates-schedule)
-  (define-key org-mode-map (kbd "C-c C-d") 'org-natural-dates-deadline))
+  (define-key org-mode-map (kbd "C-c C-s") #'org-natural-dates-schedule)
+  (define-key org-mode-map (kbd "C-c C-d") #'org-natural-dates-deadline))
 
-;; Rebind in org-agenda
+;; In the Org Agenda
 (with-eval-after-load 'org-agenda
-  (define-key org-agenda-mode-map (kbd "C-c C-s") 'org-natural-dates-agenda-schedule)
-  (define-key org-agenda-mode-map (kbd "C-c C-d") 'org-natural-dates-agenda-deadline))
-#+END_SRC
+  (define-key org-agenda-mode-map (kbd "C-c C-s") #'org-natural-dates-agenda-schedule)
+  (define-key org-agenda-mode-map (kbd "C-c C-d") #'org-natural-dates-agenda-deadline))
+#+end_src
 
-** Usage
+With a prefix argument (=C-u C-c C-s=), the commands fall back to standard =org-schedule= / =org-deadline= behaviour (calendar picker, date removal, etc.).
 
-When you invoke `C-c C-s` (now bound to `org-natural-dates-schedule`), you will be prompted with =Scheduled to:=. You can type any of the following natural language formats:
+** Supported input formats
 
-- *Relative dates:* "tomorrow", "today", "in 3 days"
-- *Times:* "at 5pm", "19:00"
-- *Recurrences:* "every day", "every 2 weeks", "every Friday"
-- *Complex:* "every Monday at 10am"
+- *Relative dates:* =tomorrow=, =today=, =yesterday=, =in 3 days=
+- *Named days:* =Monday=, =next Tuesday=, =last Wednesday=, =Fri=
+- *Times:* =at 5pm=, =at 19:00=, =@ 9=
+- *Recurrences:* =every day=, =every 2 weeks=, =every Friday=, =every other month=
+- *Ordinals:* =on the 15th of every month=, =on the 2nd of every month=
+- *Combined:* =every Monday at 10am=, =tomorrow at 3pm=
+- *Deadline keywords:* =due Friday=, =by tomorrow=, =deadline in 3 days=
 
-If you provide a prefix argument (e.g., `C-u C-c C-s`), the command will fall back to the standard `org-schedule` behavior (e.g., to remove a scheduled date or use the calendar).
+** Org Capture integration
 
-*** Org Capture Integration
-You can seamlessly integrate natural date parsing into your existing `org-capture` workflows. If you add our hook, you can type tasks like `* TODO Brush teeth every day at 5pm` during standard capture (`C-c c`), and when you finalize it (`C-c C-c`), the headline will automatically be cleaned up to `* TODO Brush teeth` and the correct `SCHEDULED:` or `DEADLINE:` timestamp will be inserted.
+Add the finalize hook to parse natural dates from capture headlines automatically:
 
-#+BEGIN_SRC elisp
-(add-hook 'org-capture-before-finalize-hook 'org-natural-dates-capture-finalize-hook)
-#+END_SRC
+#+begin_src emacs-lisp
+(add-hook 'org-capture-before-finalize-hook #'org-natural-dates-capture-finalize-hook)
+#+end_src
 
-Deadlines are automatically detected during capture via keywords (e.g., "due Friday", "deadline in 3 days", "by tomorrow").
+With this, typing =* TODO Brush teeth every day at 5pm= during capture (=C-c c=) will, on finalize (=C-c C-c=), clean the headline to =* TODO Brush teeth= and insert the correct =SCHEDULED:= timestamp.
 
-** License
-GPLv3. See LICENSE for details.
+Deadlines are auto-detected via keywords: =due Friday=, =deadline in 3 days=, =by tomorrow=.
 
 ** Development
-We use [[https://github.com/alphapapa/makem.sh][makem.sh]] for linting (`checkdoc`, `package-lint`) and testing.
 
-To run the linters and tests locally, you can use `makem.sh`. Note that on macOS, `makem.sh` requires GNU `coreutils` (specifically `gdate` and `gmktemp`) to be installed via Homebrew.
+Run checks locally before pushing:
 
-#+BEGIN_SRC bash
-curl -sL https://raw.githubusercontent.com/alphapapa/makem.sh/master/makem.sh -o makem.sh
-chmod +x makem.sh
+#+begin_src bash
+make check   # byte-compile + checkdoc + ERT tests
+make lint    # byte-compile + checkdoc only
+make test    # ERT tests only
+#+end_src
 
-# Run tests
-./makem.sh test
+CI runs these checks across Emacs 27, 28, and 29 via GitHub Actions.
 
-# Run linters
-./makem.sh lint
-#+END_SRC
+** License
 
-Continuous integration is automatically set up via GitHub Actions to verify these rules across Emacs 27, 28, and 29.
+GPLv3. See [[file:LICENSE][LICENSE]].
