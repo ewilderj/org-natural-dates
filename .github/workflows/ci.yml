@@ -22,13 +22,5 @@ jobs:
         with:
           version: ${{ matrix.emacs_version }}
 
-      - name: Download makem.sh
-        run: |
-          curl -sL https://raw.githubusercontent.com/alphapapa/makem.sh/master/makem.sh -o makem.sh
-          chmod +x makem.sh
-
       - name: Lint and Test
-        run: |
-          ./makem.sh -s sandbox \
-            --install-deps --install-linters \
-            lint-compile lint-package test
+        run: make check
