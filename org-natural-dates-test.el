@@ -1,9 +1,14 @@
 ;;; org-natural-dates-test.el --- Tests for org-natural-dates  -*- lexical-binding: t; -*-
 
+;;; Commentary:
+;; ERT tests for the org-natural-dates package.
+
+;;; Code:
+
 (require 'ert)
 (require 'org-natural-dates "./org-natural-dates.el")
 
-;; Test Cases: (INPUT . (TEXT DATE TIME REPEATER))
+;; Test Cases: (INPUT TEXT DATE TIME REPEATER [TYPE])
 (defconst org-natural-dates-test-cases
   '(;; Basic relative dates
     ("Call Dave tomorrow"
@@ -55,42 +60,45 @@
     ("File report on the 2nd of every month"
      "File report" "2" nil "+1m")
 
-        ;; Complex combinations
-        ("Status update every Monday at 10am"
-         "Status update" "Monday" "10:00" "+1w" :scheduled)
+    ;; Complex combinations
+    ("Status update every Monday at 10am"
+     "Status update" "Monday" "10:00" "+1w" :scheduled)
 
-        ;; Deadlines
-        ("Submit report by Friday"
-         "Submit report" "Friday" nil nil :deadline)
-        ("Due tomorrow"
-         "" "tomorrow" nil nil :deadline)
-        ("Project deadline in 3 days"
-         "Project" "in 3 days" nil nil :deadline)))
+    ;; Deadlines
+    ("Submit report by Friday"
+     "Submit report" "Friday" nil nil :deadline)
+    ("Due tomorrow"
+     "" "tomorrow" nil nil :deadline)
+    ("Project deadline in 3 days"
+     "Project" "in 3 days" nil nil :deadline))
+  "Test cases for `org-natural-dates-parse'.
+Each entry is a list: (INPUT TEXT DATE TIME REPEATER [TYPE]).")
 
-    (ert-deftest org-natural-dates-parsing-test ()
-      "Test parsing of natural language strings."
-      (dolist (case org-natural-dates-test-cases)
-        (let* ((input (car case))
-               (expected (cdr case))
-               (expected-text (nth 0 expected))
-               (expected-date (nth 1 expected))
-               (expected-time (nth 2 expected))
-               (expected-repeater (nth 3 expected))
-               (expected-type (or (nth 4 expected) :scheduled))
-               (result (org-natural-dates-parse input)))
+(ert-deftest org-natural-dates-parsing-test ()
+  "Test parsing of natural language strings."
+  (dolist (case org-natural-dates-test-cases)
+    (let* ((input (car case))
+           (expected (cdr case))
+           (expected-text (nth 0 expected))
+           (expected-time (nth 2 expected))
+           (expected-repeater (nth 3 expected))
+           (expected-type (or (nth 4 expected) :scheduled))
+           (result (org-natural-dates-parse input)))
 
-          (message "Testing input: %s" input)
-          (should (string= (plist-get result :text) expected-text))
+      (message "Testing input: %s" input)
+      (should (string= (plist-get result :text) expected-text))
 
-          (when expected-repeater
-            (should (string= (plist-get result :repeater) expected-repeater)))
+      (when expected-repeater
+        (should (string= (plist-get result :repeater) expected-repeater)))
 
-          (when expected-time
-            (should (string= (plist-get result :time) expected-time)))
+      (when expected-time
+        (should (string= (plist-get result :time) expected-time)))
 
-          ;; Verify type (scheduled vs deadline)
-          (should (eq (plist-get result :type) expected-type))
+      ;; Verify type (scheduled vs deadline)
+      (should (eq (plist-get result :type) expected-type))
 
-          ;; We can assert the :org-timestamp is present and valid format
-          (should (string-match-p (rx "<" (+ (any digit "-")) " " (+ (any alpha)) (+ any) ">")
-                                  (plist-get result :org-timestamp))))))
+      ;; We can assert the :org-timestamp is present and valid format
+      (should (string-match-p (rx "<" (+ (any digit "-")) " " (+ (any alpha)) (+ any) ">")
+                              (plist-get result :org-timestamp))))))
+
+;;; org-natural-dates-test.el ends here
