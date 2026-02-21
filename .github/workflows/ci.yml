@@ -27,6 +27,9 @@ jobs:
           curl -sL https://raw.githubusercontent.com/alphapapa/makem.sh/master/makem.sh -o makem.sh
           chmod +x makem.sh
 
+      - name: Install aspell (for checkdoc)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq aspell
+
       - name: Lint (checkdoc, package-lint)
         run: ./makem.sh lint
 
