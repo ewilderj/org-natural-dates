@@ -32,6 +32,7 @@
                       "week" "weekly"
                       "month" "monthly"
                       "year" "yearly"
+                      (seq "other" (1+ space) (or "day" "week" "month" "year"))
                       (seq (1+ digit) (1+ space) (or "days" "weeks" "months" "years"))
                       "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday"
                       "Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"))))
@@ -50,11 +51,13 @@
 
 (defconst org-natural-dates--date-regexp
   (rx (seq (optional (seq (group (or "on" "On" "in" "In" "due" "Due" "by" "By" "next" "Next" "last" "Last" "deadline" "Deadline")) (1+ space)))
-           (optional (seq (or "on" "in" "at" "of") (1+ space)))
+           (optional (seq (or "on" "in" "at" "of" "the") (1+ space)))
            (or "today" "tomorrow" "yesterday"
                (seq (1+ digit) (1+ space) (or "days" "weeks" "months" "years"))
                "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday"
                "Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"
+               (seq (1+ digit) (optional (or "st" "nd" "rd" "th"))
+                    (optional (seq (1+ space) "of")))
                (seq (1+ digit) (optional (or "st" "nd" "rd" "th")) (1+ space)
                     (or "Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"
                         "January" "February" "March" "April" "May" "June" "July" "August" "September" "October" "November" "December")))))
@@ -76,6 +79,9 @@
                           ((string-match "^\\(week\\|weekly\\)$" unit-part) "+1w")
                           ((string-match "^\\(month\\|monthly\\)$" unit-part) "+1m")
                           ((string-match "^\\(year\\|yearly\\)$" unit-part) "+1y")
+                          ((string-match "^other \\(day\\|week\\|month\\|year\\)$" unit-part)
+                           (let ((unit (match-string 1 unit-part)))
+                             (concat "+2" (substring unit 0 1))))
                           ((string-match "\\([0-9]+\\) \\(days?\\|weeks?\\|months?\\|years?\\)" unit-part)
                            (let ((num (match-string 1 unit-part))
                                  (unit (match-string 2 unit-part)))
@@ -135,12 +141,15 @@
 
         ;; Extract the actual date part (ignoring "on ", "in ", etc.)
         (let ((date-part (save-match-data
-                           (if (string-match (rx (or "on" "On" "in" "In" "due" "Due" "by" "By" "next" "Next" "last" "Last" "deadline" "Deadline") (1+ space)) match)
-                               (substring match (match-end 0))
-                             match))))
+                           (let ((dp (if (string-match (rx (or "on" "On" "in" "In" "due" "Due" "by" "By" "next" "Next" "last" "Last" "deadline" "Deadline") (1+ space)) match)
+                                         (substring match (match-end 0))
+                                       match)))
+                             ;; Strip ordinals ("the 15th of" -> "15") to help org-read-date
+                             (if (string-match "^\\(?:the \\)?\\([0-9]+\\)\\(?:st\\|nd\\|rd\\|th\\)?\\(?: of\\)?$" dp)
+                                 (match-string 1 dp)
+                               dp)))))
           (setq date date-part))
         ;; Ensure we remove the whole match including "deadline" if it was part of it
-        ;; The regex already covers "deadline" in the preposition group
         (setq clean-str (string-trim (replace-match "" nil nil str)))))
     (list date type clean-str)))
 

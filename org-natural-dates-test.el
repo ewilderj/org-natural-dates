@@ -44,6 +44,16 @@
      "Pay rent" nil nil "+1m")
     ("Bill pay every 2 weeks"
      "Bill pay" nil nil "+2w")
+    ("Mow lawn every other week"
+     "Mow lawn" nil nil "+2w")
+    ("Check smoke detectors every other year"
+     "Check smoke detectors" nil nil "+2y")
+
+    ;; Ordinals
+    ("Pay taxes on the 15th of every month"
+     "Pay taxes" "15" nil "+1m")
+    ("File report on the 2nd of every month"
+     "File report" "2" nil "+1m")
 
         ;; Complex combinations
         ("Status update every Monday at 10am"
