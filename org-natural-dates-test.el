@@ -17,12 +17,18 @@
      "Did laundry" "yesterday" nil nil)
     ("Submit report in 3 days"
      "Submit report" "3 days" nil nil)
+    ("Submit report in 1 day"
+     "Submit report" "1 day" nil nil)
+    ("Review in 1 week"
+     "Review" "1 week" nil nil)
 
     ;; Weekdays — full and abbreviated
     ("Lunch on Friday"
      "Lunch" "Friday" nil nil)
     ("Party next Saturday"
      "Party" "next Saturday" nil nil)
+    ("Lunch this Friday"
+     "Lunch" "Friday" nil nil)
     ("Review last Wednesday"
      "Review" "last Wednesday" nil nil)
     ("Standup on Mon"
@@ -59,6 +65,8 @@
      "Renew license" nil nil "+1y")
     ("Bill pay every 2 weeks"
      "Bill pay" nil nil "+2w")
+    ("Check in every 1 week"
+     "Check in" nil nil "+1w")
     ("Mow lawn every other week"
      "Mow lawn" nil nil "+2w")
     ("Check smoke detectors every other year"
@@ -71,6 +79,10 @@
      "Pay taxes" "15" nil "+1m")
     ("File report on the 2nd of every month"
      "File report" "2" nil "+1m")
+    ("Meeting on the 15th of March"
+     "Meeting" "15 March" nil nil)
+    ("Dentist on the 3rd of Nov"
+     "Dentist" "3 Nov" nil nil)
 
     ;; Complex combinations
     ("Status update every Monday at 10am"
@@ -225,6 +237,8 @@
   (should (string= (org-natural-dates--date-to-org "today") "."))
   (should (string= (org-natural-dates--date-to-org "tomorrow") "+1d"))
   (should (string= (org-natural-dates--date-to-org "yesterday") "-1d"))
+  (should (string= (org-natural-dates--date-to-org "1 day") "+1d"))
+  (should (string= (org-natural-dates--date-to-org "1 week") "+1w"))
   (should (string= (org-natural-dates--date-to-org "3 days") "+3d"))
   (should (string= (org-natural-dates--date-to-org "2 weeks") "+2w"))
   (should (string= (org-natural-dates--date-to-org "6 months") "+6m"))

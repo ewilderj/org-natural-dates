@@ -31,7 +31,7 @@
                       "month" "monthly"
                       "year" "yearly"
                       (seq "other" (1+ space) (or "day" "week" "month" "year"))
-                      (seq (1+ digit) (1+ space) (or "days" "weeks" "months" "years"))
+                      (seq (1+ digit) (1+ space) (or "day" "days" "week" "weeks" "month" "months" "year" "years"))
                       "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday"
                       "Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"))))
   "Regex for recurring intervals.  Matched case-insensitively.")
@@ -49,17 +49,18 @@
 
 (defconst org-natural-dates--date-regexp
   (rx (seq bow
-           (optional (seq (group (or "on" "in" "due" "by" "next" "last" "deadline")) (1+ space)))
+           (optional (seq (group (or "on" "in" "due" "by" "this" "next" "last" "deadline")) (1+ space)))
            (optional (seq (or "on" "in" "at" "of" "the") (1+ space)))
            (or "today" "tomorrow" "yesterday"
-               (seq (1+ digit) (1+ space) (or "days" "weeks" "months" "years"))
+               (seq (1+ digit) (1+ space) (or "day" "days" "week" "weeks" "month" "months" "year" "years"))
                "Monday" "Tuesday" "Wednesday" "Thursday" "Friday" "Saturday" "Sunday"
                (seq (or "Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun") eow)
-               (seq (1+ digit) (optional (or "st" "nd" "rd" "th"))
-                    (optional (seq (1+ space) "of")))
                (seq (1+ digit) (optional (or "st" "nd" "rd" "th")) (1+ space)
+                    (optional (seq "of" (1+ space)))
                     (or "Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"
-                        "January" "February" "March" "April" "May" "June" "July" "August" "September" "October" "November" "December")))))
+                        "January" "February" "March" "April" "May" "June" "July" "August" "September" "October" "November" "December"))
+               (seq (1+ digit) (optional (or "st" "nd" "rd" "th"))
+                    (optional (seq (1+ space) "of"))))))
   "Regex for date expressions.  Matched case-insensitively.")
 
 ;;; Parsing Functions
@@ -80,7 +81,7 @@
                           ((string-match-p (rx bos (or "year" "yearly") eos) unit-part) "+1y")
                           ((string-match (rx bos "other " (group (or "day" "week" "month" "year")) eos) unit-part)
                            (concat "+2" (substring (match-string 1 unit-part) 0 1)))
-                          ((string-match (rx (group (1+ digit)) " " (group (or "days" "weeks" "months" "years"))) unit-part)
+                          ((string-match (rx (group (1+ digit)) " " (group (or "day" "days" "week" "weeks" "month" "months" "year" "years"))) unit-part)
                            (concat "+" (match-string 1 unit-part) (substring (match-string 2 unit-part) 0 1)))
                           ((string-match-p (rx (or "Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun")) unit-part)
                            (setq is-weekday t)
@@ -133,18 +134,22 @@ Return a list (DATE TYPE CLEANED-STR) where TYPE is :scheduled or :deadline."
                    (string-match-p (rx bos (or "due" "by" "deadline") eos) preposition))
           (setq type :deadline))
 
-        ;; Extract the actual date part (strip "on"/"in"/"due"/"by"/"deadline",
+        ;; Extract the actual date part (strip "on"/"in"/"due"/"by"/"this"/"deadline",
         ;; but preserve "next"/"last" as date qualifiers)
         (let ((date-part (save-match-data
-                           (let ((dp (if (string-match (rx (or "on" "in" "due" "by" "deadline") (1+ space)) match)
+                           (let ((dp (if (string-match (rx (or "on" "in" "due" "by" "this" "deadline") (1+ space)) match)
                                          (substring match (match-end 0))
                                        match)))
-                             ;; Strip ordinals ("the 15th of" -> "15")
+                             ;; Strip ordinals ("the 15th of March" -> "15 March")
                              (if (string-match (rx bos (optional "the ") (group (1+ digit))
                                                    (optional (or "st" "nd" "rd" "th"))
-                                                   (optional " of") eos)
+                                                   (optional (seq (1+ space) "of"))
+                                                   (optional (seq (1+ space) (group (1+ alpha))))
+                                                   eos)
                                                dp)
-                                 (match-string 1 dp)
+                                 (if (match-string 2 dp)
+                                     (concat (match-string 1 dp) " " (match-string 2 dp))
+                                   (match-string 1 dp))
                                dp)))))
           (setq date date-part))
         (setq clean-str (string-trim (replace-match "" nil nil str)))))
@@ -185,7 +190,7 @@ Return a list (DATE TYPE CLEANED-STR) where TYPE is :scheduled or :deadline."
       ;; "in N days/weeks/months/years" or bare "N days/weeks/..."
       ((and (pred stringp)
             (guard (string-match (rx bos (optional "in ") (group (1+ digit)) " "
-                                     (group (or "days" "weeks" "months" "years")) eos)
+                                     (group (or "day" "days" "week" "weeks" "month" "months" "year" "years")) eos)
                                  date)))
        (concat "+" (match-string 1 date) (substring (match-string 2 date) 0 1)))
       (_ (or date ".")))))
